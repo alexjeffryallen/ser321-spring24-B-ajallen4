@@ -193,50 +193,120 @@ class WebServer {
             builder.append("\n");
             builder.append("File not found: " + file);
           }
-        } else if (request.contains("multiply?")) {
-          // This multiplies two numbers, there is NO error handling, so when
-          // wrong data is given this just crashes
+       }if (request.contains("multiply?")) {
+        	    // This multiplies two numbers, handle error cases
 
-          Map<String, String> query_pairs = new LinkedHashMap<String, String>();
-          // extract path parameters
-          query_pairs = splitQuery(request.replace("multiply?", ""));
+        	    Map<String, String> query_pairs = new LinkedHashMap<String, String>();
+        	    // extract path parameters
+        	    query_pairs = splitQuery(request.replace("multiply?", ""));
 
-          // extract required fields from parameters
-          Integer num1 = Integer.parseInt(query_pairs.get("num1"));
-          Integer num2 = Integer.parseInt(query_pairs.get("num2"));
+        	    // Check if both num1 and num2 are provided
+        	    if (query_pairs.containsKey("num1") && query_pairs.containsKey("num2")) {
+        	        try {
+        	            // extract required fields from parameters
+        	            Integer num1 = Integer.parseInt(query_pairs.get("num1"));
+        	            Integer num2 = Integer.parseInt(query_pairs.get("num2"));
 
-          // do math
-          Integer result = num1 * num2;
+        	            // do math
+        	            Integer result = num1 * num2;
 
-          // Generate response
-          builder.append("HTTP/1.1 200 OK\n");
-          builder.append("Content-Type: text/html; charset=utf-8\n");
-          builder.append("\n");
-          builder.append("Result is: " + result);
+        	            // Generate success response
+        	            builder.append("HTTP/1.1 200 OK\n");
+        	            builder.append("Content-Type: text/html; charset=utf-8\n");
+        	            builder.append("\n");
+        	            builder.append("Result is: " + result);
+        	        } catch (NumberFormatException e) {
+        	            // Handle case where num1 or num2 is not a valid integer
+        	            builder.append("HTTP/1.1 400 Bad Request\n");
+        	            builder.append("Content-Type: text/html; charset=utf-8\n");
+        	            builder.append("\n");
+        	            builder.append("Invalid input. Both num1 and num2 must be integers.");
+        	        }
+        	    } else {
+        	        // Handle case where one or both query parameters are missing
+        	        builder.append("HTTP/1.1 400 Bad Request\n");
+        	        builder.append("Content-Type: text/html; charset=utf-8\n");
+        	        builder.append("\n");
+        	        builder.append("Missing required query parameters: num1 and/or num2.");
+        	    }
+        	}
 
-          // TODO: Include error handling here with a correct error code and
-          // a response that makes sense
 
         } else if (request.contains("github?")) {
-          // pulls the query from the request and runs it with GitHub's REST API
-          // check out https://docs.github.com/rest/reference/
-          //
-          // HINT: REST is organized by nesting topics. Figure out the biggest one first,
-          //     then drill down to what you care about
-          // "Owner's repo is named RepoName. Example: find RepoName's contributors" translates to
-          //     "/repos/OWNERNAME/REPONAME/contributors"
-
-          Map<String, String> query_pairs = new LinkedHashMap<String, String>();
-          query_pairs = splitQuery(request.replace("github?", ""));
-          String json = fetchURL("https://api.github.com/" + query_pairs.get("query"));
-          System.out.println(json);
-
-          builder.append("HTTP/1.1 200 OK\n");
-          builder.append("Content-Type: text/html; charset=utf-8\n");
-          builder.append("\n");
-          builder.append("Check the todos mentioned in the Java source file");
-          // TODO: Parse the JSON returned by your fetch and create an appropriate
-          // response based on what the assignment document asks for
+            // Parse the query from the request
+            Map<String, String> query_pairs = new LinkedHashMap<String, String>();
+            query_pairs = splitQuery(request.replace("github?", ""));
+            
+            // Construct the GitHub API endpoint
+            String endpoint = "https://api.github.com/" + query_pairs.get("query");
+            
+            try {
+                // Fetch data from GitHub API
+                String json = fetchURL(endpoint);
+                
+                // Parse JSON response
+                JSONArray reposArray = new JSONArray(json);
+                StringBuilder responseData = new StringBuilder();
+                
+                // Extract required information for each repository
+                for (int i = 0; i < reposArray.length(); i++) {
+                    JSONObject repo = reposArray.getJSONObject(i);
+                    String fullName = repo.getString("full_name");
+                    int id = repo.getInt("id");
+                    String ownerLogin = repo.getJSONObject("owner").getString("login");
+                    
+                    // Append repository information to response data
+                    responseData.append("Full Name: ").append(fullName).append(", ");
+                    responseData.append("ID: ").append(id).append(", ");
+                    responseData.append("Owner's Login: ").append(ownerLogin).append("\n");
+                }
+                
+                // Construct HTTP response
+                builder.append("HTTP/1.1 200 OK\n");
+                builder.append("Content-Type: text/plain; charset=utf-8\n");
+                builder.append("\n");
+                builder.append(responseData.toString());
+            } catch (Exception e) {
+                // Handle errors
+                builder.append("HTTP/1.1 500 Internal Server Error\n");
+                builder.append("Content-Type: text/plain; charset=utf-8\n");
+                builder.append("\n");
+                builder.append("Error occurred while fetching or processing data from GitHub.");
+            }
+        }
+else if (request.contains("removeChar?")) {
+    	    // Handle remove character request
+    	    // Parse query parameters
+    	    Map<String, String> queryPairs = splitQuery(request.replace("removeChar?", ""));
+    	    String text = queryPairs.get("text");
+    	    String charToRemove = queryPairs.get("char");
+    	    
+    	    // Remove specified character from the input string
+    	    String result = removeCharacter(text, charToRemove);
+    	    
+    	    // Construct HTTP response
+    	    builder.append("HTTP/1.1 200 OK\n");
+    	    builder.append("Content-Type: text/plain; charset=utf-8\n");
+    	    builder.append("\n");
+    	    builder.append(result);
+    	}
+      
+else if (request.contains("multiplyString?")) {
+    	    // Handle string multiplication request
+    	    // Parse query parameters
+    	    Map<String, String> queryPairs = splitQuery(request.replace("multiplyString?", ""));
+    	    String text = queryPairs.get("text");
+    	    int multiplier = Integer.parseInt(queryPairs.get("multiplier"));
+    	    
+    	    // Multiply the input string by the multiplier
+    	    String result = multiplyString(text, multiplier);
+    	    
+    	    // Construct HTTP response
+    	    builder.append("HTTP/1.1 200 OK\n");
+    	    builder.append("Content-Type: text/plain; charset=utf-8\n");
+    	    builder.append("\n");
+    	    builder.append(result);
+    	}
 
         } else {
           // if the request is not recognized at all
