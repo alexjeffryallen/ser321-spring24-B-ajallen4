@@ -1,0 +1,50 @@
+// set as java application
+apply plugin: 'application'
+
+// Define main class
+mainClassName = 'Fraction'
+
+// Task to run Fraction with default parameters
+task runFraction(type: JavaExec) {
+    group 'Fraction Tasks'
+    description 'Runs the Fraction class with default parameters'
+
+    classpath = sourceSets.main.runtimeClasspath
+
+    // Specify the main class to run
+    main = mainClassName
+
+    // Default arguments if none are given
+    args '1'
+    args '3' // Set default denominator to 3
+}
+
+// Task to run Fraction with given parameters
+task runFrac(type: JavaExec) {
+    group 'Fraction Tasks'
+    description 'Runs the Fraction class with given parameters'
+
+    classpath = sourceSets.main.runtimeClasspath
+
+    // Specify the main class to run
+    main = mainClassName
+
+    // If both numerator and denominator properties are provided, use them
+    if (project.hasProperty("num") && project.hasProperty("denom")) {
+        args(project.getProperty('num'), project.getProperty('denom'))
+    } else if (project.hasProperty("num")) {
+        // If only numerator property is provided, set default denominator to 1
+        args(project.getProperty('num'), '1')
+    }
+}
+
+// Example how you can add that libraries can be pulled from mavenCentral()
+// repositories {
+//   mavenCentral()
+// }
+
+// Setting dependencies, e.g. when you import JSON in your Java files
+// dependencies{
+//   implementation 'org.json:json:20171018'
+// }
+
