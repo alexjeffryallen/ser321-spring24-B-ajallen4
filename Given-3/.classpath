@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="Assign3-1/src/main/java"/>
+	<classpathentry kind="src" path="Assign3-1/src/test/java"/>
+	<classpathentry kind="src" path="Assign3-2/src/main/java"/>
+	<classpathentry kind="lib" path="__MACOSX/Assign3-1/gradle/wrapper/._gradle-wrapper.jar"/>
+	<classpathentry kind="lib" path="Assign3-1/gradle/wrapper/gradle-wrapper.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
